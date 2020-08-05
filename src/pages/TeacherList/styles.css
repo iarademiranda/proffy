@@ -5,7 +5,8 @@
 
 
 #search-teachers{
-    margin-top: 3.2rem;
+     margin-top: 3.2rem; 
+
 }
 #search-teachers label{
     color: var(--color-text-in-primary);
@@ -52,6 +53,7 @@
         column-gap: 16px;
         position: absolute;
         bottom: -28px;
+     
     }
     #search-teachers .input-block + .input-block{
         margin-top: 0;
