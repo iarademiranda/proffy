@@ -1,48 +1,10 @@
 import express from 'express';
-import db from './database/connection';
-import convertHourToMinutes from './utils/convertHourToMinutes';
+import ClassesController from './controllers/ClassesControler';
+
 
 const routes = express.Router();
-interface ScheduleItem {
-    week_day:number,
-    from: string;
-    to: string;
+const classesController = new ClassesController();
 
-}
-routes.post('/classes', async(request, response)=>{
-    const {
-        name,
-        avatar,
-        whatsapp,
-        bio,
-        subject,
-        cost,
-        schedule
-    } = request.body;
-   const insertdUsersIds= await db('users').insert({
-            name,
-            avatar,
-            whatsapp,
-            bio,
-    });
-    const user_id = insertdUsersIds[0];
-    const insertedClassesIds =await db('classes').insert({
-        subject,
-        cost,
-        user_id,
-    });
-
-    const class_id = insertedClassesIds[0];
-    const classSchedule = schedule.map( (scheduleItem:ScheduleItem)=>{
-           return{
-               class_id,
-                week_day: scheduleItem.week_day,
-                from: convertHourToMinutes(scheduleItem.from),
-                to: convertHourToMinutes(scheduleItem.to)
-            };
-        })
-        await db('class_schedule').insert(classSchedule);
-    return response.send();
-});
+routes.post('/classes', classesController.create)
 
 export default routes;
