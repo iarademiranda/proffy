@@ -1,6 +1,20 @@
 import {Request, Response}  from 'express'
 import db from '../database/connection';
 import convertHourToMinutes from '../utils/convertHourToMinutes';
+interface IClass {
+    subject: string;
+    cost: number;
+    id: number;
+    user_id: number;
+  }
+  
+  interface IClassSchedule {
+    week_day: number;
+    from: number;
+    to: number;
+    id: number;
+    class_id: number;
+  }
 interface ScheduleItem {
     week_day:number,
     from: string;
@@ -8,6 +22,39 @@ interface ScheduleItem {
 
 }
 export default class ClassesController{
+//listagem de aulas com filtros
+async index(req: Request, res: Response) {
+    const filters = req.query;
+    if (!filters.subject || !filters.week_day || !filters.time) {
+      return res
+        .status(400)
+        .json({ error: 'Não foram enviados os filtros corretos' });
+    }
+    const { subject, week_day, time } = filters as {
+      subject: string;
+      week_day: string;
+      time: string;
+    };
+    const timeInMinutes = convertHourToMinutes(time);
+    // try {
+    const classes = await db('classes')
+      .whereExists(function () {
+        this.select('class_schedule.*')
+          .from('class_schedule')
+          .whereRaw('`class_schedule`.`class_id` = `classes`.`id`')
+          .whereRaw('`class_schedule`.`week_day` = ??', [Number(week_day)])
+          .whereRaw('`class_schedule`.`from` <= ??', [timeInMinutes])
+          .whereRaw('`class_schedule`.`to` > ??', [timeInMinutes]);
+      })
+      .where('classes.subject', '=', subject)
+      .join('users', 'classes.user_id', '=', 'users.id')
+      .select(['classes.*', 'users.*']);
+    return res.send(classes);
+    // } catch (error) {
+    //   res.status(400).send({ error });
+    // }
+    }
+//criação de aulas
     async create(request: Request, response:Response){
         const {
             name,
