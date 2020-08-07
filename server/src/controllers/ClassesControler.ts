@@ -36,7 +36,7 @@ async index(req: Request, res: Response) {
       time: string;
     };
     const timeInMinutes = convertHourToMinutes(time);
-    // try {
+     
     const classes = await db('classes')
       .whereExists(function () {
         this.select('class_schedule.*')
@@ -50,9 +50,7 @@ async index(req: Request, res: Response) {
       .join('users', 'classes.user_id', '=', 'users.id')
       .select(['classes.*', 'users.*']);
     return res.send(classes);
-    // } catch (error) {
-    //   res.status(400).send({ error });
-    // }
+    
     }
 //criação de aulas
     async create(request: Request, response:Response){
